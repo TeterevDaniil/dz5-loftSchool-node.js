@@ -35,8 +35,8 @@ const userSchema = new Schema({
   username: { type: String},
   accessToken: { type: String},
   refreshToken: { type: String},
-  accessTokenExpiredAt:{ type: Number, default: new Date(2020, 3, 20).getTime()},
-  refreshTokenExpiredAt: { type: Number, default: new Date(2020, 3, 20).getTime()}
+  accessTokenExpiredAt:{ type: Number, default: new Date().getTime()},
+  refreshTokenExpiredAt: { type: Number, default: new Date().getTime()}
 }
 );
 
