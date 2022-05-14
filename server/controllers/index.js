@@ -1,6 +1,9 @@
 const db = require("../models/db");
 const formidable = require('formidable');
+const userSchema = require("../models/NewUser");
 const bcrypt = require('bcrypt');
+const passport = require('passport');
+var LocalStrategy = require('passport-local');
 
 module.exports.saveNewUser = function(req, res,next) {
       try {
@@ -20,33 +23,34 @@ module.exports.saveNewUser = function(req, res,next) {
         console.error(err);
         res.status(400).json({ error: err.message });
       }
-    }
+    };
 
 
-    module.exports.UserLogin = function(req,res){
+
+
+   module.exports.UserLogin = function(req,res,next){
       const form = formidable({ multiples: true });
       form.parse(req, (err, fields) => {
-        if(err){
-          res.status(400).json({ error: err.message });
-        }
-        const aproveUser = async function(fields, err){   
-          if(err){
-            return(err);
-          }
-        const {username,password} = fields;
-        if(!username||!password){
-          return res.redirect("/");
-        }
-         var salt = bcrypt.genSaltSync(10);
-         var hash = bcrypt.hashSync(password, salt);
-         this.password = hash;
-         var userData =  db.UserLogin(username)
-         
-        console.log(userData);
-        
-       //res.json({ username });
-        }
-        aproveUser(fields);
+        const {username, password} = fields;
+
+        passport.use(new LocalStrategy({
+          username,
+          password
+              }, (username, password,done)=>{
+                userSchema.findOne({ username : username},function(err,user){
+                 // console.log("sfdfsdf");
+                  return err 
+                    ? done(err)
+                    : user
+                      ? password === user.password
+                        ? done(null, user)
+                        : done(console.log("Incorrect password"))
+                      : done(null, false, { message: 'Incorrect username.' });
+                });
+              }));
+
+   
        });
     }
+
 
