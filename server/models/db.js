@@ -18,7 +18,7 @@ module.exports.addUserToken = (id,token) => {
   return Token;  
 };
 
-module.exports.addUserToken = (id,token) => {
+module.exports.UpdateToken = (id,token) => {
   const data = {refreshToken: token}
   const Token = userSchema.findOneAndUpdate({ id: id }, data, {
     new: true

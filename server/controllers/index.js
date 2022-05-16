@@ -41,13 +41,13 @@ module.exports.UserLogin = function (req, res, next) {
     }
     const token = await db.getToken(user.id);
     await db.addUserToken(user.id, token);
- /////неуверен что создание куки необходимо 
+    /////неуверен что создание куки необходимо 
     res.cookie("accessToken", token, {
       maxAge: 7 * 60 * 60 * 1000,
       path: "/",
       httpOnly: false
     });
- /////////////
+    /////////////
     const user1 = await userSchema.findOne({ username });
     res.json({ user1 });
   });
@@ -58,9 +58,10 @@ module.exports.RefreshToken = async function (req, res) {
     const accessToken = req.headers.authorization;
     const decToken = jwt.decode(accessToken);
     const token = await db.getToken(decToken.id);
-    const refreshedToken = await db.addUserToken(decToken.id, token);
-    res.set('authorization', refreshedToken);
-    res.send()
+    const refreshedToken = await db.UpdateToken(decToken.id, token);
+    //res.set('authorization', refreshedToken);
+    req.headers.authorization = refreshedToken;
+    res.send();
 
   } catch (err) {
     console.error(err);
