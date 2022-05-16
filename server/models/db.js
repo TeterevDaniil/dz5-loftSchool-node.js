@@ -1,5 +1,6 @@
 const userSchema = require("./NewUser");
-const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { v1: uuidv1 } = require('uuid');
 
 module.exports.addUser = ({firstName,middleName,surName,username,password}) => {
    return new Promise((res, req) => {
@@ -9,20 +10,31 @@ module.exports.addUser = ({firstName,middleName,surName,username,password}) => {
   });
 };
 
+module.exports.addUserToken = (id,token) => {
+  const data = {accessToken: token}
+  const Token = userSchema.findOneAndUpdate({ id: id }, data, {
+    new: true
+  });
+  return Token;  
+};
+
+module.exports.addUserToken = (id,token) => {
+  const data = {refreshToken: token}
+  const Token = userSchema.findOneAndUpdate({ id: id }, data, {
+    new: true
+  });
+  return Token;  
+};
 
 
-module.exports.Autorization = (Password,password)=>{
-  console.log(password);
-  console.log(Password);
- 
-  const pa = !bcrypt.compare(password, Password);
-  console.log(pa);
-  if(!pa){
-   //   res.status(400).json({ error: '2Неверный логин или пароль!'});
-   console.log( '2Неверный логин или пароль!');
-    return;
-  }
-  if (pa){
-   console.log( '3Неверный логин или пароль!');
-  }
+
+
+
+module.exports.getToken= (id)=>{
+   const token = jwt.sign({ id: id }, uuidv1());
+   return token;
 }
+
+module.exports.getUserToken = function(accessToken) {
+//  return userSchema.findOne(accessToken);
+};

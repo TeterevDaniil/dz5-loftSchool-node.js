@@ -1,8 +1,8 @@
 const db = require("../models/db");
 const formidable = require('formidable');
 const userSchema = require("../models/NewUser");
-const { TableRow } = require("@material-ui/core");
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 module.exports.saveNewUser = function (req, res, next) {
   try {
@@ -31,25 +31,42 @@ module.exports.UserLogin = function (req, res, next) {
     const { username, password } = fields;
     const user = await userSchema.findOne({ username });
     if (!user) {
-      res.status(400).json({ error: '1Неверный логин или пароль!' });
+      res.status(400).json({ error: 'Неверный логин или пароль!' });
       return;
     }
     const Password = user.password;
-    console.log(password);
-    console.log(Password);
-    const pa = !bcrypt.compareSync(password, Password);
-    console.log(pa);
-    if (!pa) {
-      res.status(400).json({ error: '2Неверный логин или пароль!' });
+    if (!bcrypt.compareSync(password, Password)) {
+      res.status(400).json({ error: 'Неверный логин или пароль!' });
       return;
     }
-    if (pa) {
-      res.json({ user });
-    }
+    const token = await db.getToken(user.id);
+    await db.addUserToken(user.id, token);
+ /////неуверен что создание куки необходимо 
+    res.cookie("accessToken", token, {
+      maxAge: 7 * 60 * 60 * 1000,
+      path: "/",
+      httpOnly: false
+    });
+ /////////////
+    const user1 = await userSchema.findOne({ username });
+    res.json({ user1 });
   });
 };
 
+module.exports.RefreshToken = async function (req, res) {
+  try {
+    const accessToken = req.headers.authorization;
+    const decToken = jwt.decode(accessToken);
+    const token = await db.getToken(decToken.id);
+    const refreshedToken = await db.addUserToken(decToken.id, token);
+    res.set('authorization', refreshedToken);
+    res.send()
 
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ error: err.message });
+  }
+}
 
 
 

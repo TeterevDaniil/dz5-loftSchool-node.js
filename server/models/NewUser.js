@@ -43,17 +43,7 @@ const userSchema = new Schema({
 userSchema.methods.setPassword = function(pass) {
   var salt = bcrypt.genSaltSync(10);
   var hash = bcrypt.hashSync(pass, salt);
-
-  this.password = hash;
-};
-
-userSchema.methods.setToken = function(token) {
-  this.accessToken = token;
-  this.refreshToken = uuidv4();
-};
-
-userSchema.methods.isValidPassword = function(password) {
-  return bcrypt.compareSync(password, this.password);
+ this.password = hash;
 };
 
 var User = mongoose.model("User", userSchema);
