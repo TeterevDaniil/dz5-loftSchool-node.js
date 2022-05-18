@@ -72,3 +72,15 @@ module.exports.getUsers= () => {
     return users;
     });
 }
+
+module.exports.getUserByName = (username) => {
+  userSchema.findOne({username: username}).then(function (users) {
+    return users;
+    });
+}
+
+module.exports.getUserById = (id) => {
+  userSchema.findOne({id: id}).then(function (users) {
+    return users;
+    });
+}

@@ -4,7 +4,8 @@ const userSchema = require("../models/userSchema");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs')
-const path = require('path')
+const path = require('path');
+const passport = require("passport");
 
 
 module.exports.saveNewUser = function (req, res, next) {
@@ -27,35 +28,54 @@ module.exports.saveNewUser = function (req, res, next) {
   }
 };
 
-
-module.exports.UserLogin = function (req, res, next) {
-  const form = formidable({ multiples: true });
+module.exports.UserLogin = (req,res,next)=>{
+  passport.authenticate('local',(err, user, info)=>{
+    console.log("222dcsdcsdcsd");
+    const form = formidable({ multiples: true });
   form.parse(req, async (err, fields) => {
+    console.log("3333dcsdcsdcsd");
     const { username, password } = fields;
+    console.log(username);
     const user = await userSchema.findOne({ username });
     if (!user) {
       res.status(400).json({ error: 'Неверный логин или пароль!' });
       return res.redirect("/");
     }
-    const Password = user.password;
-    if (!bcrypt.compareSync(password, Password)) {
-      res.status(400).json({ error: 'Неверный логин или пароль!' });
-      return;
-    }
-    const token = await db.getToken(user.id);
-    await db.addUserToken(user.id, token);
-    /////неуверен что создание куки необходимо 
-    res.cookie("accessToken", token, {
-      maxAge: 7 * 60 * 60 * 1000,
-      path: "/",
-      httpOnly: false
-    });
-    /////////////
-    const user1 = await userSchema.findOne({ username });
-    res.status(200).json(user1);
- 
+    console.log("4444dcsdcsdcsd");
   });
-};
+
+   
+  })
+}
+
+// module.exports.UserLogin = function (req, res, next) {
+//   const form = formidable({ multiples: true });
+//   form.parse(req, async (err, fields) => {
+//     const { username, password } = fields;
+//     const user = await userSchema.findOne({ username });
+//     if (!user) {
+//       res.status(400).json({ error: 'Неверный логин или пароль!' });
+//       return res.redirect("/");
+//     }
+//     const Password = user.password;
+//     if (!bcrypt.compareSync(password, Password)) {
+//       res.status(400).json({ error: 'Неверный логин или пароль!' });
+//       return;
+//     }
+//     const token = await db.getToken(user.id);
+//     await db.addUserToken(user.id, token);
+//     /////неуверен что создание куки необходимо 
+//     res.cookie("accessToken", token, {
+//       maxAge: 7 * 60 * 60 * 1000,
+//       path: "/",
+//       httpOnly: false
+//     });
+//     /////////////
+//     const user1 = await userSchema.findOne({ username });
+//     res.status(200).json(user1);
+ 
+//   });
+// };
 
 module.exports.RefreshToken = async function (req, res) {
   try {
