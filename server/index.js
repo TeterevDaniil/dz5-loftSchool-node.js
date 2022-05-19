@@ -9,6 +9,7 @@ const FileStore = require('session-file-store')(session);
 const db = require("./models/db");
 const formidable = require('formidable');
 require('./models');
+
 const app = express();
 
 app.use(
@@ -18,25 +19,39 @@ app.use(
     resave: false,
     saveUninitialized: true
   })
-);
+); 
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
+ 
+   
+passport.use(
+  new LocalStrategy(
+    async function (username, password, done) {
+      const form = formidable({ multiples: true });
+      form.parse(async (err, fields) => {
+        const { username, password } = fields;
+        console.log(username, password);
+        const user = await db.getUserByName(username);
+        console.log(user);
+        return user;
+        
+      });
+    
+      //   const user = await db.getUserByName(user.username);
+    //   console.log(user);
+    //   if (user) {
+    //     console.log("sdsdsdsd");
+    //     return done(null, user);
+    //   } else {
+    //     console.log("1111sdsdsdsd");
+    //     return done(null, false);
+    //   }
+   }
 
-passport.use(new LocalStrategy(
-      async function(username, password, done) {
-      const user = await db.getUserByName("teterevdanil@gmail.com");
-      console.log(user);
-      if (user) {
-        console.log("sdsdsdsd");
-          return done(null, user);
-        } else {
-          console.log("1111sdsdsdsd");
-          return done(null, false);
-        }
-    }
-  
-));
+  ));
 
 
 
