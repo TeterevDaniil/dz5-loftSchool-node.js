@@ -4,7 +4,7 @@ const userCTRL = require('../controllers');
 
 router.post('/api/registration', userCTRL.saveNewUser);
 router.post('/api/login', userCTRL.UserLogin);
-// router.post('/api/refresh-token', userCTRL.RefreshToken);
+ router.post('/api/refresh-token', userCTRL.RefreshToken);
 // router.get('/api/profile', userCTRL.GetUser);
 // router.patch('/api/profile', userCTRL.UpdateUser);
 // router.delete('/api/users/:id', userCTRL.deleteUser);

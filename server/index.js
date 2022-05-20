@@ -20,7 +20,7 @@ app.use(
     saveUninitialized: true
   })
 ); 
-
+app.use(require('body-parser').urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -30,6 +30,7 @@ app.use(passport.session());
 passport.use(
   new LocalStrategy(
     async function (username, password, done) {
+      console.log(username);
       const form = formidable({ multiples: true });
       form.parse(async (err, fields) => {
         const { username, password } = fields;
@@ -37,7 +38,6 @@ passport.use(
         const user = await db.getUserByName(username);
         console.log(user);
         return user;
-        
       });
     
       //   const user = await db.getUserByName(user.username);

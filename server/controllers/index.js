@@ -74,8 +74,6 @@ module.exports.RefreshToken = async function (req, res) {
     const decToken = jwt.decode(accessToken);
     const token = await db.getToken(decToken.id);
     const refreshedToken = await db.UpdateToken(decToken.id, token);
-    // req.headers.authorization = refreshedToken;
-    // res.send();
     res.set('authorization', refreshedToken);
   } catch (err) {
     console.error(err);
