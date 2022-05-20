@@ -8,50 +8,46 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const db = require("./models/db");
 const formidable = require('formidable');
+const bcrypt = require("bcrypt");
 require('./models');
 
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.use(
-  session({
-    store: new FileStore(),
-    secret: 'secretWord',
-    resave: false,
-    saveUninitialized: true
-  })
-); 
-app.use(require('body-parser').urlencoded({ extended: true }));
-
+app.use(function (_, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "POST, GET, PATCH, PUT, DELETE");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With,Control-Type, Accept"
+  );
+  next();
+});
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
- 
-   
 passport.use(
-  new LocalStrategy(
-    async function (username, password, done) {
-      console.log(username);
-      const form = formidable({ multiples: true });
-      form.parse(async (err, fields) => {
-        const { username, password } = fields;
-        console.log(username, password);
-        const user = await db.getUserByName(username);
-        console.log(user);
-        return user;
-      });
-    
-      //   const user = await db.getUserByName(user.username);
-    //   console.log(user);
-    //   if (user) {
-    //     console.log("sdsdsdsd");
-    //     return done(null, user);
-    //   } else {
-    //     console.log("1111sdsdsdsd");
-    //     return done(null, false);
-    //   }
-   }
+  new LocalStrategy(async function (username, password, done) {
+    try {
+      console.log("Strategy work", username);
+      const user = await db.getUserByName(username);
+      console.log(user);
+      if (!user) {
+        return done(null, false);
+      }
 
-  ));
+      if (!bcrypt.compareSync(password, user.password)) {
+        return done(null, false);
+      }
+
+      return done(null, user);
+    } catch (err) {
+      console.log(err);
+      done(err);
+    }
+  })
+);
 
 
 
@@ -70,7 +66,7 @@ passport.deserializeUser(async (id, done) => {
 
 
 
-app.use(require('./routes'))
+app.use("/api",require('./routes'))
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -90,3 +86,5 @@ router.get("*", res => {
 app.listen(3000, function () {
   console.log("Example app listening on port 3000!");
 });
+
+// module.exports = app;

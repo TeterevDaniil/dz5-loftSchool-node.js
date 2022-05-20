@@ -27,7 +27,7 @@ module.exports.UpdateToken = (id, token) => {
   return Token;
 };
 
-module.exports.getToken = (id) => {
+module.exports.getToken = async (id) => {
   const token = jwt.sign({ id: id }, uuidv1());
   return token;
 }
@@ -73,10 +73,8 @@ module.exports.getUsers= () => {
     });
 }
 
-module.exports.getUserByName = (username) => {
-  userSchema.findOne({username: username}).then(function (users) {
-    return users;
-    });
+module.exports.getUserByName = async (username) => {
+  return userSchema.findOne({username: username});
 }
 
 module.exports.getUserById = (id) => {

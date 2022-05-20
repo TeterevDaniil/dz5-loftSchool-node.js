@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs')
 const path = require('path');
 const passport = require("passport");
+const helper = require("../helper/serialize");
 
 
 module.exports.saveNewUser = function (req, res, next) {
@@ -29,14 +30,27 @@ module.exports.saveNewUser = function (req, res, next) {
 };
 
 module.exports.UserLogin = (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    console.log(user);
-    if (!user) {
-      res.status(400).json({ error: 'Неверный логин или пароль!' });
-      return res.redirect("/");
+  passport.authenticate('local', {session: false},  async (err, user, info) => {
+    console.log('In controller');
+    if (err) {
+      return next(err);
     }
-  });
 
+    if (!user) {
+      return res.status(400).json({ message: "Не верный логин или пароль!" });
+    }
+
+    if (user) {
+      // console.log(user);
+      const token = await db.getToken(user.id);
+      console.log(token);
+      res.json({
+        ...helper.serializeUser(user),
+        accessToken:token,
+        refreshToken:token,
+      });
+    }
+  })(req, res, next);
 }
 
 // module.exports.UserLogin = function (req, res, next) {
@@ -55,7 +69,7 @@ module.exports.UserLogin = (req, res, next) => {
 //     }
 //     const token = await db.getToken(user.id);
 //     await db.addUserToken(user.id, token);
-//     /////неуверен что создание куки необходимо 
+//     /////неуверен что создание куки необходимо
 //     res.cookie("accessToken", token, {
 //       maxAge: 7 * 60 * 60 * 1000,
 //       path: "/",
@@ -127,7 +141,7 @@ module.exports.UpdateUser = async function (req, res) {
     ///const {name, price} = fields;
     /* const {originalFilename} = files.photo;
      const fileName = path.join(uploadDir,files.photo.originalFilename);
-  
+
      const dirPhoto = path.join('./assets/img/products/',files.photo.originalFilename);
      console.log(dirPhoto);
        fs.renameSync(files.photo.filepath, fileName);
