@@ -67,18 +67,29 @@ module.exports.deletenewsById = (id) => {
   });
 }
 
-module.exports.getUsers= () => {
-  userSchema.find({}).then(function (users) {
-    return users;
-    });
+module.exports.getUsers = ()=>{
+  userSchema.find({}, async function(err, docs){
+    if(err) return console.log(err);
+    console.log(docs);
+    return docs;
+  });
 }
 
+
+// module.exports.getUsers = () => {
+//   userSchema.find({}).then(function (users) {
+//     console.log("hearU");
+//     console.log(users);
+//     return users;
+//   });
+// }
+
 module.exports.getUserByName = async (username) => {
-  return userSchema.findOne({username: username});
+  return userSchema.findOne({ username: username });
 }
 
 module.exports.getUserById = (id) => {
-  userSchema.findOne({id: id}).then(function (users) {
+  userSchema.findOne({ id: id }).then(function (users) {
     return users;
-    });
+  });
 }

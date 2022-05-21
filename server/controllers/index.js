@@ -11,12 +11,19 @@ const helper = require("../helper/serialize");
 
 module.exports.saveNewUser = function (req, res, next) {
   try {
+    console.log(req.body);
+    console.log("xnj nj");
+    const user = db.addUser(req.body);
+    console.log(`New user ${req.body.username} has been saved!`);
+   res.status(200).json({ message: "GOOD" });;
+
     const form = formidable({ multiples: true });
     form.parse(req, (err, fields) => {
       if (err) {
         next(err);
         return;
       }
+      console.log(fields);
       const { firstName, middleName, surName, username, password } = fields;
       const user = db.addUser(fields);
       console.log(`New user ${username} has been saved!`);
@@ -41,7 +48,6 @@ module.exports.UserLogin = (req, res, next) => {
     }
 
     if (user) {
-      // console.log(user);
       const token = await db.getToken(user.id);
       console.log(token);
       res.json({
@@ -52,35 +58,6 @@ module.exports.UserLogin = (req, res, next) => {
     }
   })(req, res, next);
 }
-
-// module.exports.UserLogin = function (req, res, next) {
-//   const form = formidable({ multiples: true });
-//   form.parse(req, async (err, fields) => {
-//     const { username, password } = fields;
-//     const user = await userSchema.findOne({ username });
-//     if (!user) {
-//       res.status(400).json({ error: 'Неверный логин или пароль!' });
-//       return res.redirect("/");
-//     }
-//     const Password = user.password;
-//     if (!bcrypt.compareSync(password, Password)) {
-//       res.status(400).json({ error: 'Неверный логин или пароль!' });
-//       return;
-//     }
-//     const token = await db.getToken(user.id);
-//     await db.addUserToken(user.id, token);
-//     /////неуверен что создание куки необходимо
-//     res.cookie("accessToken", token, {
-//       maxAge: 7 * 60 * 60 * 1000,
-//       path: "/",
-//       httpOnly: false
-//     });
-//     /////////////
-//     const user1 = await userSchema.findOne({ username });
-//     res.status(200).json(user1);
-
-//   });
-// };
 
 module.exports.RefreshToken = async function (req, res) {
   try {
@@ -96,26 +73,33 @@ module.exports.RefreshToken = async function (req, res) {
 }
 
 module.exports.GetUser = async function (req, res) {
-  const accessToken = req.headers.authorization;
-  if (!accessToken) {
-    res.status(400).json({ error: "Возникла ошибка авторизации" });
-    return;
-  }
-  const decToken = jwt.decode(accessToken);
-  const user1 = await userSchema.findOne({ id: decToken.id });
-  res.status(200).json(user1);
-}
+  //const accessToken = req.headers.authorization;
+  console.log(req.cookie);
+  console.log(req.Authorization);
+  console.log(req.authorization);
+  console.log(req.rawHeaders.Authorization);
+  console.log("hear");
 
-module.exports.UpdateUser = async function (req, res) {
-  const accessToken = req.headers.authorization;
   // if (!accessToken) {
   //   res.status(400).json({ error: "Возникла ошибка авторизации" });
   //   return;
   // }
+  // const decToken = jwt.decode(accessToken);
+  // const user1 = await userSchema.findOne({ id: decToken.id });
+  // res.status(200).json(user1);
+}
 
-  // const form = formidable({ multiples: true });
+module.exports.UpdateUser = async function (req, res) {
+//   const accessToken = req.headers.authorization;
+//    if (!accessToken) {
+//      res.status(400).json({ error: "Возникла ошибка авторизации" });
+//      return;
+//    }
+// console.log(req);
+//   // const form = formidable({ multiples: true });
 
-  // const uploadDir = path.join(__dirname,'../uploads/img');
+console.log('in apdate user');
+   const uploadDir = path.join(__dirname,'../uploads/img');
   const formidable = require("formidable");
   const form = new formidable.IncomingForm();
   form.parse(req, async function (err, fields, files) {
@@ -123,8 +107,10 @@ module.exports.UpdateUser = async function (req, res) {
       console.error(err);
       return res.status(400).json({ error: "Возникла ошибка" });
     }
-    console.log(fields);
-    console.log(files);
+   const {firstName,sureName,middleName,oldPassword,newPassword} = fields;
+    
+   console.log(files);
+  //  console.log(files);
     // const decToken = jwt.decode(accessToken);
     // const user =  userSchema.findOne({ id: decToken.id })
     // if (!user) {
@@ -158,6 +144,7 @@ module.exports.UpdateUser = async function (req, res) {
 module.exports.deleteUser = async function (req, res) {
   try {
     db.deleteUserById(req.params.id);
+    res.status(200);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -191,11 +178,11 @@ module.exports.addNews = async function (req, res) {
     console.log(req.body);
     // console.log(userToken);
     // console.log(req.body);
-    //  const news = await db.addNews( ...req.body, userToken);
+     const news = await db.addNews( ...req.body, userToken);
     // res.json(news);
   } catch (err) {
-    //  console.error(err);
-    //  res.status(400).json({ error: err.message });
+     console.error(err);
+     res.status(400).json({ error: "Что то пошло не так!" });
   }
 }
 
@@ -211,8 +198,10 @@ module.exports.deleteNews = async function (req, res) {
 
 module.exports.GetUsers = async function (req, res) {
   try {
-    const users = db.getUsers();
-    res.json(users);
+    userSchema.find({}, async function(err, docs){
+      if(err) return console.log(err);
+      res.json(docs);
+  });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
