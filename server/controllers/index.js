@@ -156,7 +156,7 @@ module.exports.getNews = async function (req, res) {
 
 module.exports.addNews = async function (req, res) {
   try {
-    const news = await db.addNews(req.body, req.user);
+    const news = await db.addNews(req.body, req.user._id);
     const allNews = await db.getNews(); 
     res.json(allNews);
   } catch (err) {
@@ -177,19 +177,9 @@ module.exports.deleteNews = async function (req, res) {
 
 module.exports.GetUsers = async function (req, res) {
   try {
-    //   userSchema.find().then(function (users) {
-    //   res.json(users);
-    // });
     const users = await db.getUsers();
     res.json(users);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 }
- // userSchema.find({}, async function (err, docs) {
-    //   if (err) return console.log(err);
-    //   res.json(docs);
-    //   //  res.json({
-    //   //   ...helper.serializeUser(docs),
-    //   // })
-    // });

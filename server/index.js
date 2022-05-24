@@ -4,10 +4,18 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const db = require("./models/db");
 
+
+
 require('dotenv').config();
 require('./models/connection');
 
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const io = require('socket.io').listen(server);
+
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -23,6 +31,7 @@ app.use(function (_, res, next) {
 app.use(passport.initialize());
 
 require('./auth/passport');
+require('./socket/app');
 
 
 
@@ -56,8 +65,8 @@ app.use("*", (_req, res) => {
 
 });
 
-
-app.listen(process.env.PORT, () => {
+// app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
   console.log("Example app listening on port 3000!");
 });
 

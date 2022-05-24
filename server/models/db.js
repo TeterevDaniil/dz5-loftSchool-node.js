@@ -20,31 +20,6 @@ module.exports.addUser = async (data) => {
   return user;
 }
 
-
-
-
-
-// module.exports.addUserToken = (id, token) => {
-//   const data = { accessToken: token }
-//   const Token = userSchema.findOneAndUpdate({ id: id }, data, {
-//     new: true
-//   });
-//   return Token;
-// };
-
-// module.exports.UpdateToken = (id, token) => {
-//   const data = { refreshToken: token }
-//   const Token = userSchema.findOneAndUpdate({ id: id }, data, {
-//     new: true
-//   });
-//   return Token;
-// };
-
-// module.exports.getToken = async (id) => {
-//   const token = jwt.sign({ id: id }, uuidv1());
-//   return token;
-// }
-
 module.exports.deleteUserById = (id) => {
   userSchema.findOneAndDelete({ id: id }, function (err, docs) {
     if (err) {
@@ -57,33 +32,42 @@ module.exports.deleteUserById = (id) => {
 }
 
 
-module.exports.getNews = (id) => {
-  const news = newsSchema.find();
-  return news;
+module.exports.getNews = () => {
+  console.log("here");
+  const news = newsSchema.find({}).populate('user').exec(function (err, docs) {
+      if (err) return (err);
+      console.log('The author is %s', docs.user);
+     
+    });
+  // return news.map(news => ({
+  //   id: news.id,
+  //   title: news.title,
+  //   created_at: news.created_at,
+  //   text: news.text,
+  //   user: {
+  //     id: news.user.id,
+  //     username: news.user.username,
+  //     firstName: news.user.firstName,
+  //     middleName: news.user.middleName,
+  //     image: news.user.image
+  //   }
+  // }));
 }
 
 
-module.exports.addNews = async (data,userData) => {
+module.exports.addNews = async (data,id) => {
   const { title, text } = data;
-  const {_id,firstname,middleName,surName,username} = userData;
-
-  const newNews = new newsSchema({
-    created_at: Date(),
-    text: text,
-    title: title,
-    user: {
-        firstName: firstname,
-        id: _id,
-        middleName: middleName,
-        surName: surName,
-        username: username
-    }
-  })
  
+  const newNews = new newsSchema({
+    user: id,
+    title,
+    text
+  });
+
+  await newNews.save();
   const news = await newNews.save();
   return news;
-  
-}
+ }
 
 
 module.exports.deletenewsById = (id) => {
@@ -96,14 +80,6 @@ module.exports.deletenewsById = (id) => {
     }
   });
 }
-
-// module.exports.getUsers = () => {
-//   userSchema.find({}, async function (err, docs) {
-//     if (err) return console.log(err);
-//     console.log(docs);
-//     return docs;
-//   });
-// }
 
 
 module.exports.getUsers = () => {
