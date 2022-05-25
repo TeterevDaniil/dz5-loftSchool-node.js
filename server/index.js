@@ -10,10 +10,12 @@ require('dotenv').config();
 require('./models/connection');
 
 const app = express();
+
+
 const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io').listen(server);
-
+require("./socket/app")(io);
 
 
 app.use(express.json());
@@ -65,8 +67,7 @@ app.use("*", (_req, res) => {
 
 });
 
-// app.listen(process.env.PORT, () => {
+
 server.listen(process.env.PORT, () => {
   console.log("Example app listening on port 3000!");
 });
-
